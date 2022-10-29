@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { ContactForm } from './ContactForm/ContactForm';
 // import { nanoid } from 'nanoid';
 // import { GlobalStyle } from './GlobalStyle';
 // import { ModernNormalize } from 'emotion-modern-normalize';
@@ -20,13 +21,12 @@ export class App extends Component {
   };
 
   render() {
-    const { contacts } = this.state;
     return (
       <>
         {/* <ModernNormalize />
         <GlobalStyle /> */}
         <h1>Phonebook</h1>
-        {/* <ContactForm /> */}
+        <ContactForm />
         <h2>Contacts</h2>
         {/* <AddContact /> */}
         {/* <Filter /> */}
