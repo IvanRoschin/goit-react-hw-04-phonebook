@@ -1,122 +1,89 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Box } from '../Box/Box';
-import { PageTitle, ContactsTitle } from './App.stylized';
+
 import { ContactForm } from '../ContactForm/ContactForm';
-import { Filter } from '../Filter/Filter';
 import { ContactList } from '../ContactList/ContactList';
+import { Filter } from '../Filter/Filter';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      // { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      // { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      // { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      // { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+import { PageTitle, ContactsTitle } from './App.stylized';
+import { Box } from '../Box/Box';
 
-  addContact = ({ name, number }) => {
+export const App = () => {
+  const [contacts, setContacts] = useLocalStorage('contacts', []);
+  const [filter, setFilter] = useState('');
+
+  const addContact = (name, number) => {
     const contact = {
       id: nanoid(),
-      name,
-      number,
+      name: name,
+      number: number,
     };
-    const isNameExist = this.state.contacts.some(
-      contact => contact.name.toLowerCase() === name.toLowerCase()
-    );
+    const isNameExist = contacts.find(contact => contact.number === number);
+
     if (isNameExist) {
-      alert(`${name} is already in contacts`);
+      alert(`Phone ${number} is already in contacts`);
       return;
     }
-    this.setState(({ contacts }) => ({
-      contacts: [contact, ...contacts],
-    }));
+    setContacts([contact, ...contacts]);
+
     console.log('Контакт добавлен');
   };
 
-  findContact = e => {
-    this.setState({ filter: e.currentTarget.value });
+  const findContact = e => {
+    setFilter(e.currentTarget.value);
   };
 
-  renderContacts = () => {
-    const { contacts, filter } = this.state;
-    let filtered = contacts;
-    if (filter.toLowerCase()) {
-      filtered = contacts.filter(contact =>
-        contact.name.toLowerCase().includes(filter)
-      );
-    }
-    return filtered;
+  const renderContacts = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
   };
 
-  deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
-    console.log('Контакт удален');
+  const deleteContact = id => {
+    setContacts(prevState => prevState.filter(contact => contact.id !== id));
   };
 
-  componentDidMount() {
-    console.log('App componentDidMount');
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    console.log('App componentDidUpdate');
-    if (this.state.contacts !== prevState.contacts) {
-      console.log('Обновилось поле Contacts');
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
-    }
-  }
-
-  render() {
-    return (
+  return (
+    <Box
+      pt={5}
+      pl={7}
+      display="flex"
+      flexDirection="column"
+      alignItems="flex-start"
+      justifyContent="space-around"
+      style={{
+        gap: '16px',
+      }}
+    >
+      <PageTitle>Phonebook</PageTitle>
       <Box
-        pt={5}
-        pl={7}
-        display="flex"
-        flexDirection="column"
+        display="inline-flex"
         alignItems="flex-start"
         justifyContent="space-around"
         style={{
-          gap: '16px',
+          gap: '200px',
         }}
       >
-        <PageTitle>Phonebook</PageTitle>
         <Box
           display="inline-flex"
-          alignItems="flex-start"
-          justifyContent="space-around"
-          style={{
-            gap: '200px',
-          }}
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
         >
-          <Box
-            display="inline-flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <ContactsTitle>Add Contact</ContactsTitle>
+          <ContactsTitle>Add Contact</ContactsTitle>
 
-            <ContactForm onSubmit={this.addContact} />
-          </Box>
-          <Box>
-            <ContactsTitle>Contacts List</ContactsTitle>
-            <Filter findContact={this.findContact} />
-            <ContactList
-              contacts={this.renderContacts()}
-              deleteContact={this.deleteContact}
-            />
-          </Box>
+          <ContactForm onSubmit={addContact} />
+        </Box>
+        <Box>
+          <ContactsTitle>Contacts List</ContactsTitle>
+          <Filter findContact={findContact} />
+          <ContactList
+            contacts={renderContacts()}
+            deleteContact={deleteContact}
+          />
         </Box>
       </Box>
-    );
-  }
-}
+    </Box>
+  );
+};
